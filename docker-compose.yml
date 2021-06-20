@@ -12,7 +12,7 @@ services:
             - DATABASE_PASSWORD=password
             - DATABASE_HOST=orchestration-postgres
             - DATABASE_PORT=5432
-            - API_BASE_URL=""
+            - API_BASE_URL=http://block-monolith:8000
         depends_on:
             - orchestration-postgres
         volumes:
