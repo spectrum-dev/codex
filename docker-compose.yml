@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+    orchestration:
+        build:
+            context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
+        ports:
+            - 8080:8000
+        environment:
+            - DATABASE_NAME=postgres
+            - DATABASE_USER=root
+            - DATABASE_PASSWORD=password
+            - DATABASE_HOST=orchestration-postgres
+            - DATABASE_PORT=5432
+            - API_BASE_URL=""
+        depends_on:
+            - orchestration-postgres
+        volumes:
+            - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
+        entrypoint: ''
+        command: './docker-entrypoint.sh'
+        networks:
+            - default
+    
+    orchestration-postgres:
+        image: postgres:13.1
+        healthcheck:
+            test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+            timeout: 45s
+            interval: 10s
+            retries: 10
+        restart: always
+        environment:
+            - POSTGRES_USER=root
+            - POSTGRES_PASSWORD=password
+            - APP_DB_USER=docker
+            - APP_DB_PASS=docker
+            - APP_DB_NAME=orchestration
+        volumes:
+            - ./orchestration-db/01-init.sql:/docker-entrypoint-initdb.d/db.sql
+            - ./postgres-data:/var/lib/postgresql/data
+        ports:
+            - 5432:5432
+        networks:
+            - default
+    
+    block-monolith:
+        build:
+            context: ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith
+        ports:
+            - 8000:8000
+        environment:
+            - ALPHA_VANTAGE_API_KEY="TROTOWG20AM6Z39Z"
+        volumes:
+            - ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith/:/usr/src/app/
+        entrypoint: ''
+        command: './docker-entrypoint.sh'
+        networks:
+            - default

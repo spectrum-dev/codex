@@ -1,0 +1,3 @@
+CREATE USER 'root' WITH PASSWORD 'password';
+GRANT ALL PRIVILEGES ON DATABASE orchestration TO 'root';
+COMMIT;
