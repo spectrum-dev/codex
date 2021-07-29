@@ -9,7 +9,7 @@ Local environment setup can be tough, especially when there is more than one ser
     1. Clone the django-block-monolith[https://github.com/assembler-financial/django-block-monolith] and django-orchestration[https://github.com/assembler-financial/django-orchestration] repositories into the same root folder that this repository is stored in.
     
 ### Bringing up containers
-    1. `docker-compose up`
+    1. `docker-compose up --build block-monolith orchestration-postgres orchestration`
 
     Note: These dockerfiles support hot reloading on file changes.
 
