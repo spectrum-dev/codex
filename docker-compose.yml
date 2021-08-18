@@ -13,8 +13,10 @@ services:
             - DATABASE_HOST=orchestration-postgres
             - DATABASE_PORT=5432
             - API_BASE_URL=http://block-monolith:8000
+            - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
         depends_on:
             - orchestration-postgres
+            - rabbitmq
         volumes:
             - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
         entrypoint: ''
@@ -57,5 +59,15 @@ services:
             - ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith/:/usr/src/app/
         entrypoint: ''
         command: './docker-entrypoint.sh'
+        networks:
+            - default
+    
+    rabbitmq:
+        image: "rabbitmq:3-management"
+        ports:
+            - "15672:15672"
+            - "5672:5672"
+        labels:
+            NAME: "rabbitmq"
         networks:
             - default
