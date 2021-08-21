@@ -11,12 +11,12 @@ services:
             - CELERY_BACKEND_DATABASE_NAME=celery-backend
             - DATABASE_USER=root
             - DATABASE_PASSWORD=password
-            - DATABASE_HOST=orchestration-postgres
+            - DATABASE_HOST=postgres
             - DATABASE_PORT=5432
             - API_BASE_URL=http://block-monolith:8000
             - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
         depends_on:
-            - orchestration-postgres
+            - postgres
             - rabbitmq
         volumes:
             - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
@@ -25,7 +25,29 @@ services:
         networks:
             - default
     
-    orchestration-postgres:
+    orchestration-worker:
+        build:
+            context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
+        environment:
+            - DATABASE_NAME=postgres
+            - CELERY_BACKEND_DATABASE_NAME=celery-backend
+            - DATABASE_USER=root
+            - DATABASE_PASSWORD=password
+            - DATABASE_HOST=postgres
+            - DATABASE_PORT=5432
+            - API_BASE_URL=http://block-monolith:8000
+            - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
+        depends_on:
+            - postgres
+            - rabbitmq
+        volumes:
+            - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
+        entrypoint: ''
+        command: 'celery -A orchestration worker -l DEBUG'
+        networks:
+            - default
+    
+    postgres:
         image: postgres:13.3
         healthcheck:
             test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
@@ -59,18 +81,50 @@ services:
             - CELERY_BACKEND_DATABASE_NAME=celery-backend
             - DATABASE_USER=root
             - DATABASE_PASSWORD=password
-            - DATABASE_HOST=orchestration-postgres
+            - DATABASE_HOST=postgres
             - DATABASE_PORT=5432
             - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
         volumes:
             - ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith/:/usr/src/app/
         depends_on:
             - rabbitmq
+            - postgres
         entrypoint: ''
         command: './docker-entrypoint.sh'
         networks:
             - default
     
+    block-monolith-worker:
+        build:
+            context: ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith
+        environment:
+            - ALPHA_VANTAGE_API_KEY="TROTOWG20AM6Z39Z"
+            - DJANGO_SECRET_KEY=django-public-secret-key
+            - DJANGO_DEBUG="TRUE"
+            - CELERY_BACKEND_DATABASE_NAME=celery-backend
+            - DATABASE_USER=root
+            - DATABASE_PASSWORD=password
+            - DATABASE_HOST=postgres
+            - DATABASE_PORT=5432
+            - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
+        volumes:
+            - ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith/:/usr/src/app/
+        depends_on:
+            - rabbitmq
+            - postgres
+        entrypoint: ''
+        command: 'celery -A blocks worker -Q blocks -l DEBUG'
+        networks:
+            - default
+    
+    flower:  
+        image: mher/flower
+        environment:
+            - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672
+            - FLOWER_PORT=8888
+        ports:  
+            - 8888:8888
+
     rabbitmq:
         image: "rabbitmq:3-management"
         ports:
