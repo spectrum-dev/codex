@@ -122,8 +122,12 @@ services:
         environment:
             - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672
             - FLOWER_PORT=8888
+        depends_on:
+            - rabbitmq
         ports:  
             - 8888:8888
+        networks:
+            - default
 
     rabbitmq:
         image: "rabbitmq:3-management"
