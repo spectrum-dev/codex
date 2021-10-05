@@ -47,7 +47,7 @@ services:
         volumes:
             - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
         entrypoint: ''
-        command: 'celery -A orchestration worker -l DEBUG'
+        command: 'celery -A orchestration worker -l DEBUG -n orchestration@%h'
         networks:
             - default
     
@@ -133,7 +133,7 @@ services:
             - rabbitmq
             - postgres
         entrypoint: ''
-        command: 'celery -A blocks worker -Q blocks -l DEBUG'
+        command: 'celery -A blocks worker -Q blocks -l DEBUG -n block-monolith@%h'
         networks:
             - default
     
