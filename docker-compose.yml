@@ -27,7 +27,7 @@ services:
         networks:
             - default
     
-    orchestration-worker:
+    orchestration-worker-backtest:
         build:
             context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
         environment:
@@ -47,7 +47,31 @@ services:
         volumes:
             - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
         entrypoint: ''
-        command: 'celery -A orchestration worker -l DEBUG -n orchestration@%h'
+        command: 'celery -A orchestration worker -Q backtest -l INFO --concurrency 10 -n orchestration-backtest@%h'
+        networks:
+            - default
+    
+    orchestration-worker-screener:
+        build:
+            context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
+        environment:
+            - DATABASE_NAME=postgres
+            - CELERY_BACKEND_DATABASE_NAME=celery-backend
+            - DJANGO_DEBUG=1
+            - DATABASE_USER=root
+            - DATABASE_PASSWORD=password
+            - DATABASE_HOST=postgres
+            - DATABASE_PORT=5432
+            - API_BASE_URL=http://block-monolith:8000
+            - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
+            - SENTRY_DSN=""
+        depends_on:
+            - postgres
+            - rabbitmq
+        volumes:
+            - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
+        entrypoint: ''
+        command: 'celery -A orchestration worker -Q screener -l INFO --concurrency 10 -n orchestration-worker@%h'
         networks:
             - default
     
