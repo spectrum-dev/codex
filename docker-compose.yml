@@ -76,7 +76,7 @@ services:
             - default
     
     postgres:
-        image: postgres:13.3
+        image: postgres:14.1
         healthcheck:
             test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
             timeout: 45s
