@@ -100,6 +100,7 @@ services:
     block-monolith:
         build:
             context: ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith
+            dockerfile: Dockerfile.dev
         ports:
             - 8000:8000
         environment:
@@ -133,6 +134,7 @@ services:
     block-monolith-worker:
         build:
             context: ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith
+            dockerfile: Dockerfile.dev
         environment:
             - ALPHA_VANTAGE_API_KEY=TROTOWG20AM6Z39Z
             - DJANGO_SECRET_KEY=django-public-secret-key
