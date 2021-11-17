@@ -100,7 +100,7 @@ services:
     block-monolith:
         build:
             context: ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith
-            dockerfile: Dockerfile.dev
+            dockerfile: Dockerfile.m1
         ports:
             - 8000:8000
         environment:
