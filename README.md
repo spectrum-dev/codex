@@ -27,5 +27,16 @@ Local environment setup can be tough, especially when there is more than one ser
         
         Change directory into the `django-orchestration` and `django-block-monolith` repositories and run `chmod +x docker-entrypoint.sh` in each repository
 
+    3. 
+        Issue with existing port being used
+        Unix: `docker stop $(docker ps -a -q)`
+        Windows: `FOR /f "tokens=*" %i IN ('docker ps -a -q') DO docker stop %i`
 
+    4.
+        Orchestration does not start specifically on Windows
+        Try `docker-compose up orchestration`, if this fails with "standard_init_linux.go:228: exec user process caused: no such file or directory" then go into `docker-entrypoint.sh` and change file line-ending from CRLF to LF
+    
+    5. 
+        Existing PostgreSQL using port 5432
+        Go into `docker-compose.yml` and change ports to <some-free-port>:5432 and connect via <some-free-port> instead
 
