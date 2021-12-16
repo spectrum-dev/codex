@@ -75,6 +75,30 @@ services:
         networks:
             - default
     
+    orchestration-worker-beat:
+        build:
+            context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
+        environment:
+            - DATABASE_NAME=postgres
+            - CELERY_BACKEND_DATABASE_NAME=celery-backend
+            - DJANGO_DEBUG=1
+            - DATABASE_USER=root
+            - DATABASE_PASSWORD=password
+            - DATABASE_HOST=postgres
+            - DATABASE_PORT=5432
+            - API_BASE_URL=http://block-monolith:8000
+            - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
+            - SENTRY_DSN=""
+        depends_on:
+            - postgres
+            - rabbitmq
+        volumes:
+            - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
+        entrypoint: ''
+        command: 'celery -A orchestration beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler'
+        networks:
+            - default
+    
     postgres:
         image: postgres:13.3
         healthcheck:
@@ -93,7 +117,7 @@ services:
             - ./orchestration-db/01-init.sql:/docker-entrypoint-initdb.d/db.sql
             - ./postgres-data:/var/lib/postgresql/data
         ports:
-            - 5432:5432
+            - 54321:5432
         networks:
             - default
     
@@ -118,7 +142,7 @@ services:
             - DATA_BANK_DATABASE_PASSWORD=password
             - DATA_BANK_DATABASE_HOST=postgres
             - DATA_BANK_DATABASE_PORT=5432
-            - EOD_HISTORICAL_DATA_API_KEY=TEST
+            - EOD_HISTORICAL_DATA_API_KEY=61543cba1ee392.50941658
             - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
             - SENTRY_DSN=""
         volumes:
@@ -150,7 +174,7 @@ services:
             - DATA_BANK_DATABASE_PASSWORD=password
             - DATA_BANK_DATABASE_HOST=postgres
             - DATA_BANK_DATABASE_PORT=5432
-            - EOD_HISTORICAL_DATA_API_KEY=TEST
+            - EOD_HISTORICAL_DATA_API_KEY=61543cba1ee392.50941658
             - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
             - SENTRY_DSN=""
         volumes:
