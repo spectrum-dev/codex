@@ -11,6 +11,22 @@ x-common-variables: &common-variables
     RABBIT_MQ_URL: amqp://guest:guest@rabbitmq:5672
     SENTRY_DSN: ""
 
+x-common-orchestration-variables: &common-orchestration-variables
+    <<: *common-variables
+    DATABASE_NAME: postgres
+
+x-common-block-monolith-variables: &common-block-monolith-variables
+    <<: *common-variables
+    ALPHA_VANTAGE_API_KEY: TROTOWG20AM6Z39Z
+    DJANGO_SECRET_KEY: django-public-secret-key
+    DATABASE_NAME: default
+    DATA_BANK_DATABASE_NAME: data-bank
+    DATA_BANK_DATABASE_USER: root
+    DATA_BANK_DATABASE_PASSWORD: password
+    DATA_BANK_DATABASE_HOST: postgres
+    DATA_BANK_DATABASE_PORT: 5432
+    EOD_HISTORICAL_DATA_API_KEY: 61543cba1ee392.50941658
+
 services:
     orchestration:
         build:
@@ -18,8 +34,7 @@ services:
         ports:
             - 8080:8000
         environment:
-            <<: *common-variables
-            DATABASE_NAME: postgres
+            <<: *common-orchestration-variables
         depends_on:
             - postgres
             - rabbitmq
@@ -34,8 +49,7 @@ services:
         build:
             context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
         environment:
-            <<: *common-variables
-            DATABASE_NAME: postgres
+            <<: *common-orchestration-variables
         depends_on:
             - postgres
             - rabbitmq
@@ -50,8 +64,7 @@ services:
         build:
             context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
         environment:
-            <<: *common-variables
-            DATABASE_NAME: postgres
+            <<: *common-orchestration-variables
         depends_on:
             - postgres
             - rabbitmq
@@ -66,8 +79,7 @@ services:
         build:
             context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
         environment:
-            <<: *common-variables
-            DATABASE_NAME: postgres
+            <<: *common-orchestration-variables
         depends_on:
             - postgres
             - rabbitmq
@@ -107,16 +119,7 @@ services:
         ports:
             - 8000:8000
         environment:
-            <<: *common-variables
-            ALPHA_VANTAGE_API_KEY: TROTOWG20AM6Z39Z
-            DJANGO_SECRET_KEY: django-public-secret-key
-            DATABASE_NAME: default
-            DATA_BANK_DATABASE_NAME: data-bank
-            DATA_BANK_DATABASE_USER: root
-            DATA_BANK_DATABASE_PASSWORD: password
-            DATA_BANK_DATABASE_HOST: postgres
-            DATA_BANK_DATABASE_PORT: 5432
-            EOD_HISTORICAL_DATA_API_KEY: 61543cba1ee392.50941658
+            <<: *common-block-monolith-variables
         volumes:
             - ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith/:/usr/src/app/
         depends_on:
@@ -132,16 +135,7 @@ services:
             context: ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith
             dockerfile: Dockerfile.m1
         environment:
-            <<: *common-variables
-            ALPHA_VANTAGE_API_KEY: TROTOWG20AM6Z39Z
-            DJANGO_SECRET_KEY: django-public-secret-key
-            DATABASE_NAME: default
-            DATA_BANK_DATABASE_NAME: data-bank
-            DATA_BANK_DATABASE_USER: root
-            DATA_BANK_DATABASE_PASSWORD: password
-            DATA_BANK_DATABASE_HOST: postgres
-            DATA_BANK_DATABASE_PORT: 5432
-            EOD_HISTORICAL_DATA_API_KEY: 61543cba1ee392.50941658
+            <<: *common-block-monolith-variables
         volumes:
             - ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith/:/usr/src/app/
         depends_on:
