@@ -1,5 +1,32 @@
 version: '3.8'
 
+x-common-variables: &common-variables
+    CELERY_BACKEND_DATABASE_NAME: celery-backend
+    DJANGO_DEBUG: 1
+    DATABASE_USER: root
+    DATABASE_PASSWORD: password
+    DATABASE_HOST: postgres
+    DATABASE_PORT: 5432
+    API_BASE_URL: http://block-monolith:8000
+    RABBIT_MQ_URL: amqp://guest:guest@rabbitmq:5672
+    SENTRY_DSN: ""
+
+x-common-orchestration-variables: &common-orchestration-variables
+    <<: *common-variables
+    DATABASE_NAME: postgres
+
+x-common-block-monolith-variables: &common-block-monolith-variables
+    <<: *common-variables
+    ALPHA_VANTAGE_API_KEY: TROTOWG20AM6Z39Z
+    DJANGO_SECRET_KEY: django-public-secret-key
+    DATABASE_NAME: default
+    DATA_BANK_DATABASE_NAME: data-bank
+    DATA_BANK_DATABASE_USER: root
+    DATA_BANK_DATABASE_PASSWORD: password
+    DATA_BANK_DATABASE_HOST: postgres
+    DATA_BANK_DATABASE_PORT: 5432
+    EOD_HISTORICAL_DATA_API_KEY: 61543cba1ee392.50941658
+
 services:
     orchestration:
         build:
@@ -7,16 +34,7 @@ services:
         ports:
             - 8080:8000
         environment:
-            - DATABASE_NAME=postgres
-            - CELERY_BACKEND_DATABASE_NAME=celery-backend
-            - DJANGO_DEBUG=1
-            - DATABASE_USER=root
-            - DATABASE_PASSWORD=password
-            - DATABASE_HOST=postgres
-            - DATABASE_PORT=5432
-            - API_BASE_URL=http://block-monolith:8000
-            - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
-            - SENTRY_DSN=""
+            <<: *common-orchestration-variables
         depends_on:
             - postgres
             - rabbitmq
@@ -31,16 +49,7 @@ services:
         build:
             context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
         environment:
-            - DATABASE_NAME=postgres
-            - CELERY_BACKEND_DATABASE_NAME=celery-backend
-            - DJANGO_DEBUG=1
-            - DATABASE_USER=root
-            - DATABASE_PASSWORD=password
-            - DATABASE_HOST=postgres
-            - DATABASE_PORT=5432
-            - API_BASE_URL=http://block-monolith:8000
-            - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
-            - SENTRY_DSN=""
+            <<: *common-orchestration-variables
         depends_on:
             - postgres
             - rabbitmq
@@ -55,16 +64,7 @@ services:
         build:
             context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
         environment:
-            - DATABASE_NAME=postgres
-            - CELERY_BACKEND_DATABASE_NAME=celery-backend
-            - DJANGO_DEBUG=1
-            - DATABASE_USER=root
-            - DATABASE_PASSWORD=password
-            - DATABASE_HOST=postgres
-            - DATABASE_PORT=5432
-            - API_BASE_URL=http://block-monolith:8000
-            - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
-            - SENTRY_DSN=""
+            <<: *common-orchestration-variables
         depends_on:
             - postgres
             - rabbitmq
@@ -72,6 +72,21 @@ services:
             - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
         entrypoint: ''
         command: 'celery -A orchestration worker -Q screener -l INFO --concurrency 10 -n orchestration-worker@%h'
+        networks:
+            - default
+    
+    orchestration-worker-beat:
+        build:
+            context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
+        environment:
+            <<: *common-orchestration-variables
+        depends_on:
+            - postgres
+            - rabbitmq
+        volumes:
+            - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
+        entrypoint: ''
+        command: 'celery -A orchestration beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler'
         networks:
             - default
     
@@ -104,23 +119,7 @@ services:
         ports:
             - 8000:8000
         environment:
-            - ALPHA_VANTAGE_API_KEY=TROTOWG20AM6Z39Z
-            - DJANGO_SECRET_KEY=django-public-secret-key
-            - DJANGO_DEBUG=1
-            - CELERY_BACKEND_DATABASE_NAME=celery-backend
-            - DATABASE_NAME=default
-            - DATABASE_USER=root
-            - DATABASE_PASSWORD=password
-            - DATABASE_HOST=postgres
-            - DATABASE_PORT=5432
-            - DATA_BANK_DATABASE_NAME=data-bank
-            - DATA_BANK_DATABASE_USER=root
-            - DATA_BANK_DATABASE_PASSWORD=password
-            - DATA_BANK_DATABASE_HOST=postgres
-            - DATA_BANK_DATABASE_PORT=5432
-            - EOD_HISTORICAL_DATA_API_KEY=TEST
-            - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
-            - SENTRY_DSN=""
+            <<: *common-block-monolith-variables
         volumes:
             - ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith/:/usr/src/app/
         depends_on:
@@ -136,23 +135,7 @@ services:
             context: ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith
             dockerfile: Dockerfile.m1
         environment:
-            - ALPHA_VANTAGE_API_KEY=TROTOWG20AM6Z39Z
-            - DJANGO_SECRET_KEY=django-public-secret-key
-            - DJANGO_DEBUG=1
-            - CELERY_BACKEND_DATABASE_NAME=celery-backend
-            - DATABASE_NAME=default
-            - DATABASE_USER=root
-            - DATABASE_PASSWORD=password
-            - DATABASE_HOST=postgres
-            - DATABASE_PORT=5432
-            - DATA_BANK_DATABASE_NAME=data-bank
-            - DATA_BANK_DATABASE_USER=root
-            - DATA_BANK_DATABASE_PASSWORD=password
-            - DATA_BANK_DATABASE_HOST=postgres
-            - DATA_BANK_DATABASE_PORT=5432
-            - EOD_HISTORICAL_DATA_API_KEY=TEST
-            - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
-            - SENTRY_DSN=""
+            <<: *common-block-monolith-variables
         volumes:
             - ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith/:/usr/src/app/
         depends_on:
