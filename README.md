@@ -51,8 +51,8 @@ Note: These dockerfiles support hot reloading on file changes.
 
 ### Common Setup Issues
     1.
-        You will need to export ASSEMBLER_PROJECT_DIR, which is the folder where you will keep all assembler-related code
-        `export ASSEMBLER_PROJECT_DIR="/path/to/assember-root-file"`
+        You will need to export CODEX_PROJECT_DIR, which is the folder where you will keep all assembler-related code
+        `export CODEX_PROJECT_DIR="/path/to/assember-root-file"`
     
     2.
         You may need to add permissions for all the `docker-entrypoint.sh` files
