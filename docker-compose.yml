@@ -3,7 +3,7 @@ version: '3.8'
 services:
     orchestration:
         build:
-            context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
+            context: ${CODEX_PROJECT_DIR:-..}/django-orchestration
         ports:
             - 8080:8000
         environment:
@@ -21,7 +21,7 @@ services:
             - postgres
             - rabbitmq
         volumes:
-            - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
+            - ${CODEX_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
         entrypoint: ''
         command: './docker-entrypoint.sh'
         networks:
@@ -29,7 +29,7 @@ services:
     
     orchestration-worker-backtest:
         build:
-            context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
+            context: ${CODEX_PROJECT_DIR:-..}/django-orchestration
         environment:
             - DATABASE_NAME=postgres
             - CELERY_BACKEND_DATABASE_NAME=celery-backend
@@ -45,7 +45,7 @@ services:
             - postgres
             - rabbitmq
         volumes:
-            - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
+            - ${CODEX_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
         entrypoint: ''
         command: 'celery -A orchestration worker -Q backtest -l INFO --concurrency 10 -n orchestration-backtest@%h'
         networks:
@@ -53,7 +53,7 @@ services:
     
     orchestration-worker-screener:
         build:
-            context: ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration
+            context: ${CODEX_PROJECT_DIR:-..}/django-orchestration
         environment:
             - DATABASE_NAME=postgres
             - CELERY_BACKEND_DATABASE_NAME=celery-backend
@@ -69,7 +69,7 @@ services:
             - postgres
             - rabbitmq
         volumes:
-            - ${ASSEMBLER_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
+            - ${CODEX_PROJECT_DIR:-..}/django-orchestration/:/usr/src/app/
         entrypoint: ''
         command: 'celery -A orchestration worker -Q screener -l INFO --concurrency 10 -n orchestration-worker@%h'
         networks:
@@ -99,12 +99,12 @@ services:
     
     block-monolith:
         build:
-            context: ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith
+            context: ${CODEX_PROJECT_DIR:-..}/django-block-monolith
             dockerfile: Dockerfile.m1
         ports:
             - 8000:8000
         environment:
-            - ALPHA_VANTAGE_API_KEY=TROTOWG20AM6Z39Z
+            - ALPHA_VANTAGE_API_KEY=TROTOWG20AM6Z39Z # TODO: inactive key - need to replace
             - DJANGO_SECRET_KEY=django-public-secret-key
             - DJANGO_DEBUG=1
             - CELERY_BACKEND_DATABASE_NAME=celery-backend
@@ -118,11 +118,11 @@ services:
             - DATA_BANK_DATABASE_PASSWORD=password
             - DATA_BANK_DATABASE_HOST=postgres
             - DATA_BANK_DATABASE_PORT=5432
-            - EOD_HISTORICAL_DATA_API_KEY=TEST
+            - EOD_HISTORICAL_DATA_API_KEY=TEST # TODO: inactive key - need to replace
             - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
             - SENTRY_DSN=""
         volumes:
-            - ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith/:/usr/src/app/
+            - ${CODEX_PROJECT_DIR:-..}/django-block-monolith/:/usr/src/app/
         depends_on:
             - rabbitmq
             - postgres
@@ -133,10 +133,10 @@ services:
     
     block-monolith-worker:
         build:
-            context: ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith
+            context: ${CODEX_PROJECT_DIR:-..}/django-block-monolith
             dockerfile: Dockerfile.m1
         environment:
-            - ALPHA_VANTAGE_API_KEY=TROTOWG20AM6Z39Z
+            - ALPHA_VANTAGE_API_KEY=TROTOWG20AM6Z39Z # TODO: inactive key - need to replace
             - DJANGO_SECRET_KEY=django-public-secret-key
             - DJANGO_DEBUG=1
             - CELERY_BACKEND_DATABASE_NAME=celery-backend
@@ -150,11 +150,11 @@ services:
             - DATA_BANK_DATABASE_PASSWORD=password
             - DATA_BANK_DATABASE_HOST=postgres
             - DATA_BANK_DATABASE_PORT=5432
-            - EOD_HISTORICAL_DATA_API_KEY=TEST
+            - EOD_HISTORICAL_DATA_API_KEY=TEST # TODO: inactive key - need to replace
             - RABBIT_MQ_URL=amqp://guest:guest@rabbitmq:5672
             - SENTRY_DSN=""
         volumes:
-            - ${ASSEMBLER_PROJECT_DIR:-..}/django-block-monolith/:/usr/src/app/
+            - ${CODEX_PROJECT_DIR:-..}/django-block-monolith/:/usr/src/app/
         depends_on:
             - rabbitmq
             - postgres
